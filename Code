@@ -1,0 +1,220 @@
+clc 
+clear all 
+
+a = 0.38;
+b = 0.24;
+c = 0.07;
+r1 = 0.14;
+r2 = 0.2;
+F1x = 3600;
+F1y = 1000;
+F1z = 1000;
+F2x = 2500;
+F2y = 2520;
+F2z = 1200;
+n = 600;
+
+%% Płaszczynza XY
+
+Rd = (-F2x*(a+b)+F1x*a)/(a+b+c)
+Ra = F1x - F2x - Rd
+
+%% Płaszczyzna XZ
+
+Rd2 = (-F2y*(a+b)+F1y*a)/(a+b+c)
+Ra2 = F1y - F2y - Rd2
+
+%% Momenty skręcające
+
+Mb = F1x *r1;
+Mc = Mb
+
+%% wypadkowe siły 
+
+Rd = sqrt(Rd^2+Rd2^2)
+Ra = sqrt(Ra^2+Ra2^2)
+
+%% wykres momentow gnących XZ
+
+x1 = 0:0.001:0.38;
+x2 = 0.38:0.001:0.62;
+x3 = 0.62:0.001:0.69;
+
+M11 = Ra2 .*x1;
+M12 =  Ra2 .* x2 - F1y .* ( x2 - a );
+M13 =  Ra2 .* x3 - F1y .* ( x3 - a ) + F2y .* (x3-(a+b));
+
+figure
+hold on
+plot(x1,M11);
+plot(x2,M12);
+plot(x3,M13);
+grid on
+xlabel('Długość wału [m]')
+ylabel("Moment [Nm]")
+title('Moment gnący płaszczyzna XZ')
+hold off
+
+%% wykres momentow gnących XY
+
+x1 = 0:0.001:0.38;
+x2 = 0.38:0.001:0.62;
+x3 = 0.62:0.001:0.69;
+
+M21 =  -Ra .*x1;
+M22 =  -Ra .* x2 + F1x .* ( x2 - a );
+M23 =  -Ra .* x3 + F1x .* ( x3 - a ) - F2x .* (x3-(a+b));
+
+figure
+hold on
+plot(x1,M21);
+plot(x2,M22);
+plot(x3,M23);
+xlabel('Długość wału [m]')
+ylabel("Moment [Nm]")
+title('Moment gnący płaszczyzna XY')
+grid on
+hold off
+
+
+
+%% Moment wypadkowy i wykres
+
+x1 = 0:0.001:0.38;
+x2 = 0.38:0.001:0.62;
+x3 = 0.62:0.001:0.69;
+
+Mw1 = sqrt(M11.^2 + M21.^2);
+Mw2= sqrt(M12.^2 + M22.^2);
+Mw3 = sqrt(M13.^2 + M23.^2);
+
+hold on
+plot(x1,Mw1);
+plot(x2,Mw2);
+plot(x3,Mw3);
+xlabel('Długość wału [m]')
+ylabel("Moment [Nm]")
+title('Wypadkowy moment gnący')
+grid on
+hold off
+
+%% moment zredukowany 
+Md = 0;
+
+Mzr1 = sqrt(Mw1.^2);
+Mzr2 = sqrt(Mw2.^2 + (3/4)*Mc^2);
+Mzr3 = sqrt(Mw3.^2+(3/4)*Md^2);
+figure
+hold on
+plot(x1,Mzr1)
+plot(x2,Mzr2)
+plot(x3,Mzr3)
+title('Resultant reduced moment')
+ylabel("Moment [Nm]")
+xlabel("Shaft length [m]")
+grid on
+
+%% średnice 
+
+da = power((32*Mzr1)/(pi*105*10^6), 1/3);
+db = power((32*Mzr2)/(pi*105*10^6), 1/3);
+dc = power((32*Mzr3)/(pi*105*10^6), 1/3);
+
+figure
+hold on
+plot(x1,da)
+plot(x2,db)
+plot(x3,dc)
+ylabel('Diameter [m]')
+xlabel('Shaft length [m]')
+title('Actual minimum shaft diameter')
+hold off
+grid on
+
+%% wypusty 
+% 35
+
+% l1 = 22400/((0.009/2)*3*146*10^6)
+% 
+% l2 = 22400/(0.014*3*115*10^6)
+
+l3 = 28800/((0.008/2)*3*146*10^6)
+
+l4 = 28800/(0.01*3*115*10^6)
+
+%% łożyska 
+Pa = 1*1*Ra;
+Pd = 1*1*Rd;
+
+L10h = 10000 ;
+L10 = (60*n*L10h)/10^6;
+e = 3;
+
+Ca = Pa * power(L10,1/e) 
+Cd = Pd * power(L10,1/e) 
+
+%%
+d1 = 0.035;
+d2 = 0.045;
+
+I1 = (pi*d1)/16
+I2 = (pi*d2)/16
+
+%% sztrzałka ugięcia
+
+
+
+
+rownanie1 = -(Ra*1/6*0.69^3-F1x*1/6*(0.69-a)^2+F2x*1/6*(0.69-a-b)^3)/0.69;
+
+B =  (Ra*1/6*0.38^3-F1x*1/6*(0.38-a)^2+F2x*1/6*(0.38-a-b)^3 -24.85*0.38)/(210*10^5*0.0088)
+C =  (Ra*1/6*0.62^3-F1x*1/6*(0.62-a)^2+F2x*1/6*(0.62-a-b)^3 -24.85*0.62)/(210*10^5*0.0088)
+
+%% strzałka
+
+rownanie2 = -(Ra2*1/6*0.69^3-F1y*1/6*(0.69-a)^2+F2y*1/6*(0.69-a-b)^3)/0.69
+
+B2 =  (Ra2*1/6*0.38^3-F1y*1/6*(0.38-a)^2+F2y*1/6*(0.38-a-b)^3 + 7.63*0.38)/(210*10^5*0.0088)
+C2 =  (Ra2*1/6*0.62^3-F1y*1/6*(0.62-a)^2+F2y*1/6*(0.62-a-b)^3 + 7.63*0.62)/(210*10^5*0.0088)
+
+%%
+
+BB = sqrt(B^2+B2^2)
+CC = sqrt(C^2+C2^2)
+
+%% Prędkość krytyczna 
+
+
+wz1 = sqrt(9.81/0.0000147)
+wz2 = sqrt(9.81/C)
+
+ww1 = sqrt((wz1^2*wz2^2)/(wz1^2+wz2^2))
+
+%%
+wz3 = sqrt(9.81/0.00000614)
+wz4 = sqrt(9.81/C2)
+
+ww = sqrt((wz3^2*wz4^2)/(wz3^2+wz4^2))
+
+www = sqrt(ww1^2+ww^2)
+
+n = 30/pi * www
+
+%% 
+
+    wgx = (523.6*32)/(pi*0.045^3)
+
+    %% współczynnik
+
+    koniec = 250*10^6/(wgx*1.5*1.4)
+
+    %% skręcanie
+
+    wgx = (Mb*16)/(pi*0.045^3)
+
+    %% współczynnik
+
+    koniec2 = 115*10^6/(wgx*1.53*1.32);
+
+
+    Konieckoniec = (koniec*koniec)/sqrt(koniec^2+koniec2^2)
