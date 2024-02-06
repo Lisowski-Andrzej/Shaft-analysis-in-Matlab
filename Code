@@ -27,7 +27,7 @@ Ra2 = F1y - F2y - Rd2
 %% Momenty skręcające
 
 Mb = F1x *r1;
-Mc = Mb
+Mc = Mb;
 
 %% wypadkowe siły 
 
